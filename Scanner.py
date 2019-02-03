@@ -13,7 +13,7 @@ class Scanner():
         self.angle = 0
         self.direction = "CCW"
                 
-    def do_scan(self, step = 3, min_angle = -30, max_angle = 30):        
+    def do_scan(self, step = 3, min_angle = -50, max_angle = 50):        
         while self.actual_steps < step:
             self.actual_steps += 1     
             dist = self.lidar.get_distance()
@@ -35,6 +35,6 @@ class Scanner():
         
 if __name__ == "__main__":
     scanner = Scanner()
-    scanner.do_scan(step = 30)
+    scanner.do_scan(step = 600)
     print("next")
-    scanner.do_scan(step = 30)
+    scanner.do_scan(step = 600)

@@ -33,7 +33,7 @@ class Stepper():
             else:
                 GPIO.output(x_pin, False)
                 
-    def do_step(self, step, speed = 0.02):
+    def do_step(self, step, speed = 0.0):
         for loop in range(0,abs(step)):
             if step > 0:
                 self.step_counter += 1
