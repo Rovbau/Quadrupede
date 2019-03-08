@@ -10,7 +10,7 @@ from math import *
 from MotorPwm import *
 from Manuell import *
 from ServoCont import *
-
+from Pumper import *
 class Motion():
     def __init__(self):
         self.ACHSDIST = 280.0
@@ -19,6 +19,9 @@ class Motion():
         self.servo = Servo()
 
     def setMotion(self,steer,speed):
+
+        steer = max(min(1.0,steer), -1.0)
+        speed = max(min(1.0,speed), -1.0)
         self.steer, self.speed = steer, speed
         self.servo_l , self.servo_r = self.calc_ServoAngle(steer,speed)
         self.m1_speed, self.m2_speed, self.m3_speed, self.m4_speed = self.calc_Speed(self.steer,self.speed)
@@ -105,15 +108,20 @@ if __name__ == "__main__":
     
     manuell = Manuell()
     motion  = Motion()
+    pumper = Pumper()
     ThreadEncoder=Thread(target=manuell.runManuell,args=())
     ThreadEncoder.daemon=True
     ThreadEncoder.start()
 
     while True:
+        L, R = pumper.get_pumper_status()
+        if L == True:
+            motion.setMotion(0,0)
+            sleep(3)
         steer, speed = manuell.getManuellCommand()
         motion.setMotion(steer, speed)
         motion.print_motion()
-        sleep(1)
+        sleep(0.5)
 
 
 

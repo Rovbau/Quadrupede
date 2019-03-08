@@ -18,8 +18,6 @@ class Servo():
         servo_angle1 = 90 + self.servo_corr1 + servo_angle1 * (-1)
         servo_angle2 = 90 + self.servo_corr2 + servo_angle2 * (-1)
         #servo_angle1 = 35  #120mitte 225rechts 35links
-        #servo_angle2 = 35
-        print(servo_angle1,servo_angle2)
         bus.write_byte_data(self.addr_pic, int(servo_angle1), int(servo_angle2))
 
 

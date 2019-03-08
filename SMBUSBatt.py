@@ -39,6 +39,10 @@ class SMBUSBatt():
         """Returns Current in mA"""
         register = 0x0a
         value = self.read_word(register)
+        try:
+            value = 65635 - value
+        except:
+            print ("stoerung")
         return (value)
     
     def get_relative_charge(self):

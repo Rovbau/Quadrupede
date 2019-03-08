@@ -46,7 +46,7 @@ class Karte():
     def updateRoboPos(self,deltaL,deltaR,KompassCourse=None):
         """Update Robo Position auf Karte"""
         #RoboSchwerpunkt bis Rad cm
-        Radstand= 34.5
+        Radstand= 30.2
         countsRadGross= 288
 
         #Werte Uebernehmen: Counts in (cm) umrechnen
