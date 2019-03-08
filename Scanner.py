@@ -18,6 +18,7 @@ class Scanner():
             self.actual_steps += 1     
             dist = self.lidar.get_distance()
             print(dist)
+            sleep(0.01)
 
             if self.direction == "CCW":
                 self.angle += 1
