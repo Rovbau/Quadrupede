@@ -4,6 +4,7 @@
 from time import sleep
 from Stepper import *
 from Lidar import *
+from math import *
 
 class Scanner():
     def __init__(self):
@@ -14,19 +15,20 @@ class Scanner():
         self.direction = "CCW"
         self.scan_data = []
                 
-    def do_scan(self, step = 3, min_angle = -50, max_angle = 50):        
+    def do_scan(self, step = 3, min_angle = -90, max_angle = 90):        
         while self.actual_steps < step:
-            self.actual_steps += 1     
+            self.actual_steps += 1
+            
             dist = self.lidar.get_distance()
-            print(dist)
-            self.scan_data.append(dist)
-            sleep(0.01)
+            dx, dy = self.polar_to_kartesian(dist, self.angle)
+            self.scan_data.append([dx,dy])
+            #sleep(0.01)
 
             if self.direction == "CCW":
-                self.angle += 1
+                self.angle = round(self.angle + 1.8, 2)
                 self.stepper.do_step(1)
             else:
-                self.angle -= 1
+                self.angle = round(self.angle - 1.8, 2)
                 self.stepper.do_step(-1)
                 
             if (self.angle >= max_angle):
@@ -34,6 +36,12 @@ class Scanner():
             if (self.angle <= min_angle):
                 self.direction = "CCW"          
         self.actual_steps = 0
+
+    def polar_to_kartesian(self, dist, winkel):
+        """returns aus Dist und Winkel Dx,Dy"""
+        dx=int((dist*cos(radians(winkel))))
+        dy=int((dist*sin(radians(winkel))))
+        return(dx,dy)
 
     def get_scan_data(self):
         data = self.scan_data
@@ -43,6 +51,6 @@ class Scanner():
         
 if __name__ == "__main__":
     scanner = Scanner()
-    scanner.do_scan(step = 600)
+    scanner.do_scan(step = 200)
     print("next")
-    scanner.do_scan(step = 600)
+

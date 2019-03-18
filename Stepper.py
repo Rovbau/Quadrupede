@@ -3,6 +3,7 @@
 
 from time import sleep
 import RPi.GPIO as GPIO
+GPIO.setwarnings(False)
 
 class Stepper():
     def __init__(self):
@@ -23,6 +24,8 @@ class Stepper():
             GPIO.setup(pin,GPIO.OUT)
             GPIO.output(pin, False)
         self.set_step_output()
+        print("Set Scanner to Zero position")
+        sleep(3)
 
     def set_step_output(self):
         for pin in range(0, 4):

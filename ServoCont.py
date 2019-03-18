@@ -18,8 +18,10 @@ class Servo():
         servo_angle1 = 90 + self.servo_corr1 + servo_angle1 * (-1)
         servo_angle2 = 90 + self.servo_corr2 + servo_angle2 * (-1)
         #servo_angle1 = 35  #120mitte 225rechts 35links
-        bus.write_byte_data(self.addr_pic, int(servo_angle1), int(servo_angle2))
-
+        try:
+            bus.write_byte_data(self.addr_pic, int(servo_angle1), int(servo_angle2))
+        except:
+            print("Servo not ready")
 
 
 if __name__ == "__main__":
@@ -27,9 +29,9 @@ if __name__ == "__main__":
     servo = Servo()
     servo.set_servo_angle(0,0)
     sleep(5)
-    servo.set_servo_angle(-10,-50)
+    servo.set_servo_angle(-45,-45)
     sleep(5)
-    servo.set_servo_angle(-40,-90)
+    servo.set_servo_angle(90,90)
 
 
 

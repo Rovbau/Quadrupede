@@ -14,9 +14,11 @@ def getKompass():
     """Returns KompassKurs"""
     Kurs=0
     KompassAdress=0x61
-    daten1=bus.read_byte_data(KompassAdress,0x02)
-    daten2=bus.read_byte_data(KompassAdress,0x03)
-
+    try:
+        daten1=bus.read_byte_data(KompassAdress,0x02)
+        daten2=bus.read_byte_data(KompassAdress,0x03)
+    except:
+        return(None)
     Kurs=(daten1<<8)+daten2
     Kurs=Kurs/10
     Kurs= 360 - Kurs

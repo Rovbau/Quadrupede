@@ -24,8 +24,12 @@ class Lidar():
       return -1
 
   def writeAndWait(self, register, value):
-    self.bus.write_byte_data(self.address, register, value);
-
+    try:
+      self.bus.write_byte_data(self.address, register, value);
+      return(True)
+    except:
+      return(False)
+    
   def readAndWait(self, register):
     try:
         res = self.bus.read_byte_data(self.address, register)
@@ -35,14 +39,14 @@ class Lidar():
 
   def get_distance(self):
     """Read Lidar distance [cm], Waits for BusyFlag = low""" 
-    self.writeAndWait(self.distWriteReg, self.distWriteVal)
+    write_ok = self.writeAndWait(self.distWriteReg, self.distWriteVal)
 
     status_bit = self.readAndWait(self.status)
     status_bit = '{0:08b}'.format(status_bit)
     while status_bit[7] == "1":
         status_bit = self.readAndWait(self.status)
         status_bit = '{0:08b}'.format(status_bit)
-        time.sleep(0.02)
+        #time.sleep(0.02)
     dist1 = self.readAndWait(self.distReadReg1)
     dist2 = self.readAndWait(self.distReadReg2)
     return (dist1 << 8) + dist2
@@ -67,7 +71,7 @@ if __name__ == "__main__":
   start = time.time()
   for  i in range(30):
     x = lidar.get_distance()
-    time.sleep(1)    
+    #time.sleep(1)    
   
     print(x)
   stop = time.time()

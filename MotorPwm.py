@@ -51,33 +51,35 @@ class MotorPWM(object):
         Input: [float -1.0 -> +1.0]
         Output [None]"""
  
+        try:            
+            if m1_speed > 0:           
+                self._m1.setSpeed(int(abs(m1_speed*200)))
+                self._m2.setSpeed(int(abs(m2_speed*200)))
+                self._m3.setSpeed(int(abs(m3_speed*200)))
+                self._m4.setSpeed(int(abs(m4_speed*200)))
+                self._m1.run(Adafruit_MotorHAT.FORWARD)
+                self._m2.run(Adafruit_MotorHAT.FORWARD)         
+                self._m3.run(Adafruit_MotorHAT.FORWARD)
+                self._m4.run(Adafruit_MotorHAT.FORWARD)
+                self.motor_backward = False
+            else:
+                self._m1.setSpeed(int(abs(m1_speed*200)))
+                self._m2.setSpeed(int(abs(m2_speed*200)))
+                self._m3.setSpeed(int(abs(m3_speed*200)))
+                self._m4.setSpeed(int(abs(m4_speed*200)))
+                self._m1.run(Adafruit_MotorHAT.BACKWARD)
+                self._m2.run(Adafruit_MotorHAT.BACKWARD)         
+                self._m3.run(Adafruit_MotorHAT.BACKWARD)
+                self._m4.run(Adafruit_MotorHAT.BACKWARD)
+                self.motor_backward = True
 
-        if m1_speed > 0:           
-            self._m1.setSpeed(int(abs(m1_speed*200)))
-            self._m2.setSpeed(int(abs(m2_speed*200)))
-            self._m3.setSpeed(int(abs(m3_speed*200)))
-            self._m4.setSpeed(int(abs(m4_speed*200)))
-            self._m1.run(Adafruit_MotorHAT.FORWARD)
-            self._m2.run(Adafruit_MotorHAT.FORWARD)         
-            self._m3.run(Adafruit_MotorHAT.FORWARD)
-            self._m4.run(Adafruit_MotorHAT.FORWARD)
-            self.motor_backward = False
-        else:
-            self._m1.setSpeed(int(abs(m1_speed*200)))
-            self._m2.setSpeed(int(abs(m2_speed*200)))
-            self._m3.setSpeed(int(abs(m3_speed*200)))
-            self._m4.setSpeed(int(abs(m4_speed*200)))
-            self._m1.run(Adafruit_MotorHAT.BACKWARD)
-            self._m2.run(Adafruit_MotorHAT.BACKWARD)         
-            self._m3.run(Adafruit_MotorHAT.BACKWARD)
-            self._m4.run(Adafruit_MotorHAT.BACKWARD)
-            self.motor_backward = True
-
-        if m1_speed and m2_speed and m3_speed and m4_speed == 0:
-            self._m1.run(Adafruit_MotorHAT.RELEASE)
-            self._m2.run(Adafruit_MotorHAT.RELEASE)         
-            self._m3.run(Adafruit_MotorHAT.RELEASE)
-            self._m4.run(Adafruit_MotorHAT.RELEASE)
+            if m1_speed and m2_speed and m3_speed and m4_speed == 0:
+                self._m1.run(Adafruit_MotorHAT.RELEASE)
+                self._m2.run(Adafruit_MotorHAT.RELEASE)         
+                self._m3.run(Adafruit_MotorHAT.RELEASE)
+                self._m4.run(Adafruit_MotorHAT.RELEASE)
+        except:
+            print("MotorHAT not ready")
  
     def motor_is_backward(self):
         """Returns TRUE wenn Motor retour"""
