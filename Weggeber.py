@@ -19,25 +19,28 @@ class Weggeber():
         _ = bus.read_byte_data(self.addrweggeber,0x01)  #Dummy read damit Counter null
         _ = bus.read_byte_data(self.addrweggeber,0x03)
 
-        print("Init Weggeber")    
+        print("Init Weggeber")
 
     def update_weggeberpulse(self):
         """Count pulse L und R und DistanzRad, loop"""
         #Get Weggeber counts and clear Register
-        left_low = bus.read_byte_data(self.addrweggeber,0x01)  #Read PIC Register1 => CountsLowByte
-        left_high = bus.read_byte_data(self.addrweggeber,0x02)  #read CountsHighByte
-        left = (left_high << 8) + left_low
-        if left > 32767:
-            left = (65536 - left) * (-1)
-        self.CountL = left
-       
-        right_low = bus.read_byte_data(self.addrweggeber,0x03)  #Read PIC Register1 => CountsLowByte
-        right_high = bus.read_byte_data(self.addrweggeber,0x04)  #read CountsHighByte
-        right = (right_high << 8) + right_low
-        if right > 32767:
-            right = (65536 - right) * (-1)
-        self.CountR = right        
-
+        try:
+            left_low = bus.read_byte_data(self.addrweggeber,0x01)  #Read PIC Register1 => CountsLowByte
+            left_high = bus.read_byte_data(self.addrweggeber,0x02)  #read CountsHighByte
+            left = (left_high << 8) + left_low
+            if left > 32767:
+                left = (65536 - left) * (-1)
+            self.CountL = left
+            
+            right_low = bus.read_byte_data(self.addrweggeber,0x03)  #Read PIC Register1 => CountsLowByte
+            right_high = bus.read_byte_data(self.addrweggeber,0x04)  #read CountsHighByte
+            right = (right_high << 8) + right_low
+            if right > 32767:
+                right = (65536 - right) * (-1)
+            self.CountR = right
+        except:
+            self.CountR = 0
+            self.CountR = 0
         return
     
     def clearWeggeberLR(self):

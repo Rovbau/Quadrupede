@@ -6,7 +6,8 @@ from SMBUSBatt import *
 from Pathplaning import *
 from Scanner import *
 from math import *
-import pickle 
+import pickle
+from Avoid import *
 
 
 manuell = Manuell()
@@ -16,6 +17,7 @@ karte = Karte()
 weggeber = Weggeber()
 pathplaning = Pathplaning()
 scanner = Scanner()
+avoid = Avoid()
 
 ThreadEncoder=Thread(target=manuell.runManuell,args=())
 ThreadEncoder.daemon=True
@@ -53,8 +55,12 @@ while True:
         karte.updateObstacles(scan_data)
         pickle_file = open("scanfile.p", "wb")
         obstacles = karte.getObstacles()
+
+        max_importance = avoid.get_nearest_obst(x, y, pose, obstacles)
+        print("max_importance: " +str(max_importance))
+
+        
         obstacles[0] = [x, y,pose]
-        print(obstacles[:10])
         scans.append(obstacles)
         pickle.dump(scans, pickle_file)
         pickle_file.close()
@@ -63,4 +69,4 @@ while True:
     steer, speed = manuell.getManuellCommand()
     motion.setMotion(steer, speed)
     print("---")
-    sleep(0.3)
+    sleep(3.3)
