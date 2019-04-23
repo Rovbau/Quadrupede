@@ -8,6 +8,7 @@ from Scanner import *
 from math import *
 import pickle
 from Avoid import *
+from Transmit import *
 
 
 manuell = Manuell()
@@ -18,6 +19,7 @@ weggeber = Weggeber()
 pathplaning = Pathplaning()
 scanner = Scanner()
 avoid = Avoid()
+transmit = Transmit()
 
 ThreadEncoder=Thread(target=manuell.runManuell,args=())
 ThreadEncoder.daemon=True
@@ -28,6 +30,7 @@ x_goal = 0
 y_goal = 70
 speed = 0.1
 scans = []
+max_importance = 0
 
 while True:
     
@@ -48,25 +51,27 @@ while True:
 ##    print(steering_angle)
 
     #Scan
-    if speed == 0:
+    if speed == 1:
         scanner.do_scan(step=25)
         #motion.setMotion(0,0)
         scan_data = scanner.get_scan_data()
         karte.updateObstacles(scan_data)
-        pickle_file = open("scanfile.p", "wb")
+        #pickle_file = open("scanfile.p", "wb")
         obstacles = karte.getObstacles()
 
         max_importance = avoid.get_nearest_obst(x, y, pose, obstacles)
         print("max_importance: " +str(max_importance))
+        avoided_obstacles = avoid.avoided_obst()
 
-        
-        obstacles[0] = [x, y,pose]
-        scans.append(obstacles)
-        pickle.dump(scans, pickle_file)
-        pickle_file.close()
+        transmit.send_data(obstacles, avoided_obstacles, [0,0])
+        #obstacles[0] = [x, y,pose]
+        #scans.append(obstacles)
+        #pickle.dump(scans, pickle_file)
+        #pickle_file.close()
 
     #Manual
     steer, speed = manuell.getManuellCommand()
+    steer = steer - abs(max_importance)
     motion.setMotion(steer, speed)
     print("---")
-    sleep(3.3)
+    sleep(0.3)

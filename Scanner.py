@@ -15,14 +15,14 @@ class Scanner():
         self.direction = "CCW"
         self.scan_data = []
                 
-    def do_scan(self, step = 3, min_angle = -90, max_angle = 90):        
+    def do_scan(self, step = 3, min_angle = -85, max_angle = 85):        
         while self.actual_steps < step:
             self.actual_steps += 1
             
-            dist = self.lidar.get_distance()
-            dx, dy = self.polar_to_kartesian(dist, self.angle)
-            self.scan_data.append([dx,dy])
-            #sleep(0.01)
+            dist = self.lidar.get_distance()    # zero if LIDAR error
+            if dist > 10:
+                dx, dy = self.polar_to_kartesian(dist, self.angle)
+                self.scan_data.append([dx,dy])
 
             if self.direction == "CCW":
                 self.angle = round(self.angle + 1.8, 2)
