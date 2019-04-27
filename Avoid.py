@@ -1,11 +1,11 @@
 #! python
 # -*- coding: utf-8 -*-
 
-from math import sqrt, exp, pi, degrees, atan2, atan, cos
+from math import sqrt, exp, pi, degrees, radians, atan2, atan, cos
 
 class Avoid():
     def __init__(self):
-        self.TRESHOLD = 0.01
+        self.TRESHOLD = 0.2
         self.MAX_OBST_OBSERV = 200
         self.obst_fifo = []
         self.colision_obst = []
@@ -16,23 +16,24 @@ class Avoid():
         self.robo_pos_x = robo_pos_x
         self.robo_pos_y = robo_pos_y
         self.pose = pose
-        self.max_importance = 0
+        max_absolut = 0
+        avoid_steering = 0
         self.obst_fifo.extend(obstacles)
         self.limit_fifo_lengh()
         self.colision_obst = self.colision_analysis(self.obst_fifo)
-       
+        nearest_obst = []
+
         for obstacle in self.colision_obst:
-            nearest_obst = []
             dist = sqrt(pow(self.robo_pos_x - obstacle[0],2) + pow(self.robo_pos_y - obstacle[1],2))
-            force = self.calc_force(dist)
-            importance = force * cos(obstacle[2])
+            importance = self.calc_force(dist, obstacle[2])
             if abs(importance) > self.TRESHOLD:
-                if abs(importance) > self.max_importance:
-                   self.max_importance =  importance
+                if abs(importance) > max_absolut:
+                   max_absolut =  abs(importance)
+                   avoid_steering = importance
                    nearest_obst = obstacle[0:2]
         if nearest_obst:
             self.avoided_obstacles.append(nearest_obst)
-        return(self.max_importance)
+        return(avoid_steering)
 
     def colision_analysis(self, obstacles):
         """return list of obstacles[x,y,kurs_diff] witch are in +/- SCAN_ANGLE"""
@@ -59,10 +60,17 @@ class Avoid():
             len_fifo = len(self.obst_fifo) - self.MAX_OBST_OBSERV 
             del self.obst_fifo[:len_fifo]
 
-    def calc_force(self, dist):
-        """return INT avoid_force, higher if dist shorter"""
-        avoid_force = exp(-(dist-60)*0.05)
-        return(avoid_force)
+    def calc_force(self, dist, kurs_diff):
+        """return INT avoidance_force , higher if dist shorter, higher if kurs_diff smaller"""
+        avoid_force = exp(-(dist-60)*0.07)
+        angle_force = cos(radians(kurs_diff))
+        if kurs_diff < 0:
+            angle_force = abs(angle_force) * (-1)
+        else:
+            angle_force = abs(angle_force)
+            
+        importance = avoid_force * angle_force
+        return(importance)
 
     def angle_diff(self, soll, ist):
         """get angle between two angles in range -180/180 """
@@ -87,6 +95,9 @@ if __name__ == "__main__":
     robo_pos_y = 0
     pose       = 20
     obstacles = [[0,50],[70,70], [200,300]]
+
+    for i in range(0,120,10):
+        print(i , avoid.calc_force(i, 10) )
 
     print(avoid.get_nearest_obst(robo_pos_x, robo_pos_y, pose, obstacles))
     print(avoid.avoided_obst())

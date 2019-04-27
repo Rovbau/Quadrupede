@@ -15,7 +15,7 @@ class Scanner():
         self.direction = "CCW"
         self.scan_data = []
                 
-    def do_scan(self, step = 3, min_angle = -85, max_angle = 85):        
+    def do_scan(self, step = 3, min_angle = -80, max_angle = 80):        
         while self.actual_steps < step:
             self.actual_steps += 1
             

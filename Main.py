@@ -30,7 +30,7 @@ x_goal = 0
 y_goal = 70
 speed = 0.1
 scans = []
-max_importance = 0
+main_steering = 0
 
 while True:
     
@@ -59,11 +59,19 @@ while True:
         #pickle_file = open("scanfile.p", "wb")
         obstacles = karte.getObstacles()
 
-        max_importance = avoid.get_nearest_obst(x, y, pose, obstacles)
-        print("max_importance: " +str(max_importance))
+        avoid_steering = avoid.get_nearest_obst(x, y, pose, obstacles)
+        kurs_to_ziel = avoid.direction(x, y, 3000,0)
+        kurs_diff = avoid.angle_diff(kurs_to_ziel, pose)
+        goal_steering =  kurs_diff / 180
+        main_steering = goal_steering + avoid_steering
+        
+        
+        print("avoid_steering: " +str(avoid_steering))
+        print("goal_steering: " +str(goal_steering))
+        print("main_steering: " +str(main_steering))
         avoided_obstacles = avoid.avoided_obst()
 
-        transmit.send_data(obstacles, avoided_obstacles, [0,0])
+        transmit.send_data(obstacles, avoided_obstacles, [[x,y]])
         #obstacles[0] = [x, y,pose]
         #scans.append(obstacles)
         #pickle.dump(scans, pickle_file)
@@ -71,7 +79,9 @@ while True:
 
     #Manual
     steer, speed = manuell.getManuellCommand()
-    steer = steer - abs(max_importance)
+    steer = main_steering
     motion.setMotion(steer, speed)
+    if speed == 0:
+        sleep(8)
     print("---")
     sleep(0.3)

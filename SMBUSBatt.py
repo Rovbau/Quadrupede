@@ -68,13 +68,12 @@ if __name__ == "__main__":
     batt = SMBUSBatt()
  
     while True:
-        time.sleep(5)
         print("Volage:  " + str(batt.get_voltage()))
         print("Current: " + str(batt.get_current()))
         print("State:   " + str(batt.get_relative_charge()))
         print("Empty in:" + str(batt.get_time_to_empty()))
         print("Full in: " + str(batt.get_time_to_full()))
-
+        time.sleep(5)
 
 
 
