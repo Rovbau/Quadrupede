@@ -32,6 +32,8 @@ speed = 0.1
 scans = []
 main_steering = 0
 
+scanner.scanner_reset()
+wall_modus = False
 while True:
     
     if battery.get_relative_charge() < 30:
@@ -49,7 +51,8 @@ while True:
 ##    steering_angle = pathplaning.get_steering_angle(radians(soll_pose), radians(pose))
 ##    motion.setMotion(steering_angle, 0.2)
 ##    print(steering_angle)
-
+    
+    
     #Scan
     if speed == 1:
         scanner.do_scan(step=25)
@@ -59,18 +62,23 @@ while True:
         #pickle_file = open("scanfile.p", "wb")
         obstacles = karte.getObstacles()
 
-        avoid_steering = avoid.get_nearest_obst(x, y, pose, obstacles)
+        avoid_steering, max_left, max_right = avoid.get_nearest_obst(x, y, pose, obstacles)
+
+        if abs(avoid_steering) > 0:
+            wall_modus = True
+        print("avoid_steering: " +str(avoid_steering))       
         kurs_to_ziel = avoid.direction(x, y, 3000,0)
         kurs_diff = avoid.angle_diff(kurs_to_ziel, pose)
-        goal_steering =  kurs_diff / 180
-        main_steering = goal_steering + avoid_steering
+        goal_steering =  abs(kurs_diff / 180)
         
+        if wall_modus == True:
+            goal_steering = 0.5
+        main_steering = max_left + goal_steering      
         
-        print("avoid_steering: " +str(avoid_steering))
-        print("goal_steering: " +str(goal_steering))
+        print("max_left: " +str(max_left))
         print("main_steering: " +str(main_steering))
+        
         avoided_obstacles = avoid.avoided_obst()
-
         transmit.send_data(obstacles, avoided_obstacles, [[x,y]])
         #obstacles[0] = [x, y,pose]
         #scans.append(obstacles)

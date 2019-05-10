@@ -47,10 +47,16 @@ class Scanner():
         data = self.scan_data
         self.scan_data = []
         return (data)
+
+    def scanner_reset(self):
+        print("Set Scanner to Zero position")
+        self.stepper.do_step(-200)
+        self.stepper.do_step(76)
        
         
 if __name__ == "__main__":
     scanner = Scanner()
-    scanner.do_scan(step = 200)
+    #scanner.do_scan(step = 200)
+    scanner.scanner_reset()
     print("next")
 
