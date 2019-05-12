@@ -28,7 +28,6 @@ class Avoid():
         for obstacle in self.colision_obst:
             dist = self.distance(self.robo_pos_x, self.robo_pos_y , obstacle[0], obstacle[1])
             importance = self.calc_force(dist, obstacle[2])
-            print(importance, obstacle[2])
             if abs(importance) > self.TRESHOLD:
                 if importance < 0 and importance < max_left:
                    max_left =  importance

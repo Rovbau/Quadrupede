@@ -9,6 +9,7 @@ from math import *
 import pickle
 from Avoid import *
 from Transmit import *
+from Planer import *
 
 
 manuell = Manuell()
@@ -20,6 +21,8 @@ pathplaning = Pathplaning()
 scanner = Scanner()
 avoid = Avoid()
 transmit = Transmit()
+pumper = Pumper()
+planer = Planer(avoid)
 
 ThreadEncoder=Thread(target=manuell.runManuell,args=())
 ThreadEncoder.daemon=True
@@ -30,12 +33,12 @@ x_goal = 0
 y_goal = 70
 speed = 0.1
 scans = []
-main_steering = 0
+steering_output = 0
 
 scanner.scanner_reset()
-wall_modus = False
+
 while True:
-    
+    pumper.status_led("on")
     if battery.get_relative_charge() < 30:
         print(3 *"BATTERY-EMPTY ")
 
@@ -56,40 +59,29 @@ while True:
     #Scan
     if speed == 1:
         scanner.do_scan(step=25)
-        #motion.setMotion(0,0)
         scan_data = scanner.get_scan_data()
+
         karte.updateObstacles(scan_data)
-        #pickle_file = open("scanfile.p", "wb")
         obstacles = karte.getObstacles()
-
+        
         avoid_steering, max_left, max_right = avoid.get_nearest_obst(x, y, pose, obstacles)
-
-        if abs(avoid_steering) > 0:
-            wall_modus = True
-        print("avoid_steering: " +str(avoid_steering))       
-        kurs_to_ziel = avoid.direction(x, y, 3000,0)
-        kurs_diff = avoid.angle_diff(kurs_to_ziel, pose)
-        goal_steering =  abs(kurs_diff / 180)
-        
-        if wall_modus == True:
-            goal_steering = 0.5
-        main_steering = max_left + goal_steering      
-        
-        print("max_left: " +str(max_left))
-        print("main_steering: " +str(main_steering))
-        
+        steering_output = planer.set_modus(x, y, pose, avoid_steering, max_left, max_right)
+        print(steering_output)
         avoided_obstacles = avoid.avoided_obst()
-        transmit.send_data(obstacles, avoided_obstacles, [[x,y]])
+        #transmit.send_data(obstacles, avoided_obstacles, [[x,y]])
         #obstacles[0] = [x, y,pose]
         #scans.append(obstacles)
+        #pickle_file = open("scanfile.p", "wb")
         #pickle.dump(scans, pickle_file)
         #pickle_file.close()
 
     #Manual
     steer, speed = manuell.getManuellCommand()
-    steer = main_steering
+    steer = steering_output
+    motion.stop(pumper.em_stop())
     motion.setMotion(steer, speed)
     if speed == 0:
         sleep(8)
-    print("---")
+    #print("---")
+    pumper.status_led("off")
     sleep(0.3)

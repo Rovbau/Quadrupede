@@ -26,7 +26,7 @@ class Motion():
         self.servo_l , self.servo_r = self.calc_ServoAngle(steer,speed)
         self.m1_speed, self.m2_speed, self.m3_speed, self.m4_speed = self.calc_Speed(self.steer,self.speed)
 
-        if abs(self.speed) < 0.1:
+        if abs(self.speed) < 0.1 or self.em_stop == True:
             self.motor_pwm.setCommand(0,0,0,0)
             self.servo.set_servo_angle(0,0)
             return
@@ -43,6 +43,10 @@ class Motion():
             self.motor_pwm.setCommand(self.m1_speed, self.m2_speed, self.m3_speed, self.m4_speed)
             self.servo.set_servo_angle(self.servo_l, self.servo_r)
 
+    def stop(self, em_stop):
+        self.em_stop = em_stop
+        if self.em_stop == True:
+            print("Error: EM-Stop Motor")
             
     def print_motion(self):
         print("%s %9.2f %9.2f" %("Motion: ",self.steer, self.speed))
