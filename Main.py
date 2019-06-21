@@ -22,7 +22,7 @@ scanner = Scanner()
 avoid = Avoid()
 transmit = Transmit()
 pumper = Pumper()
-planer = Planer(avoid)
+planer = Planer(avoid, karte)
 
 ThreadEncoder=Thread(target=manuell.runManuell,args=())
 ThreadEncoder.daemon=True
@@ -31,7 +31,9 @@ ThreadEncoder.start()
 theta_goal = 180
 x_goal = 0
 y_goal = 70
-speed = 0.1
+steer = 0
+speed = 1
+halt = 1
 scans = []
 steering_output = 0
 
@@ -54,34 +56,32 @@ while True:
 ##    steering_angle = pathplaning.get_steering_angle(radians(soll_pose), radians(pose))
 ##    motion.setMotion(steering_angle, 0.2)
 ##    print(steering_angle)
-    
-    
-    #Scan
-    if speed == 1:
-        scanner.do_scan(step=25)
-        scan_data = scanner.get_scan_data()
 
-        karte.updateObstacles(scan_data)
-        obstacles = karte.getObstacles()
-        
-        avoid_steering, max_left, max_right = avoid.get_nearest_obst(x, y, pose, obstacles)
-        steering_output = planer.set_modus(x, y, pose, avoid_steering, max_left, max_right)
-        print(steering_output)
-        avoided_obstacles = avoid.avoided_obst()
-        #transmit.send_data(obstacles, avoided_obstacles, [[x,y]])
-        #obstacles[0] = [x, y,pose]
-        #scans.append(obstacles)
-        #pickle_file = open("scanfile.p", "wb")
-        #pickle.dump(scans, pickle_file)
-        #pickle_file.close()
+    scanner.do_scan(step=25)
+    scan_data = scanner.get_scan_data()
+
+    karte.updateObstacles(scan_data)
+    obstacles = karte.getObstacles()
+    
+    avoid_steering, max_left, max_right = avoid.get_nearest_obst(x, y, pose, obstacles)
+    steering_output, speed = planer.set_modus(x, y, pose, steer, speed, avoid_steering, max_left, max_right, pumper.em_stop())
+    print(steering_output)
+    avoided_obstacles = avoid.avoided_obst()
+    transmit.send_data(obstacles, avoided_obstacles, [[x,y]])
+    #obstacles[0] = [x, y,pose]
+    #scans.append(obstacles)
+    #pickle_file = open("scanfile.p", "wb")
+    #pickle.dump(scans, pickle_file)
+    #pickle_file.close()
 
     #Manual
-    steer, speed = manuell.getManuellCommand()
+    steer, halt = manuell.getManuellCommand()
     steer = steering_output
-    motion.stop(pumper.em_stop())
+    #motion.stop(pumper.em_stop())
     motion.setMotion(steer, speed)
-    if speed == 0:
+    if halt == 0:
+        motion.stop(True)
         sleep(8)
-    #print("---")
+    print("---")
     pumper.status_led("off")
-    sleep(0.3)
+    sleep(0.2)

@@ -17,6 +17,7 @@ class Motion():
         self.BREITE = 350.0
         self.motor_pwm = MotorPWM()
         self.servo = Servo()
+        self.em_stop = False
 
     def setMotion(self,steer,speed):
 

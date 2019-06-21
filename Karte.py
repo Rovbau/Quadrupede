@@ -12,36 +12,38 @@ class Karte():
         self.RoboPosX= 0
         self.RoboPath=[]
         self.globalObstaclesList=[]
+        self.globalHardObstaclesList = []
         self.global_kurs= 0
         self.kompassOld=0
         self.timeold=0
 
-    def updateObstacles(self, Obstacles):
+    def updateObstacles(self, obstacles):
         """Obstacles werden in Karte eingetragen"""
-        for Obstacle in Obstacles:            
+        global_obs = self.calcGlobalObstaclePosition(obstacles)
+        self.globalObstaclesList.extend(global_obs)
+    
+    def updateHardObstacles(self):
+        """Obstacles von Pumper eintragen"""
+        global_obs = self.calcGlobalObstaclePosition([[10, 20],[10, 0],[10, -20]])
+        self.globalHardObstaclesList.extend(global_obs)
+
+    def calcGlobalObstaclePosition(self, obstacles):
+        """Calc the global position of every local Obstacle, Returns list"""       
+        global_obstacle_list = []
+        for obstacle in obstacles:            
             #Wandeln Winkeldaten für Globalberechnung: -90zu+90 und +90zu-90 0=0
             #ScanList[i][0]=degrees(asin(sin(radians(ScanList[i][0])+radians(180))))
 
-            Dx = Obstacle[0]
-            Dy = Obstacle[1]
+            Dx = obstacle[0]
+            Dy = obstacle[1]
 
             #Drehmatrix für X, Returns Global Hindernis Position
             X=(Dx*cos(radians(self.global_kurs))+Dy*(-sin(radians(self.global_kurs))))+self.RoboPosX
             #Drehmatrix für Y, Returns Global Hindernis Position
             Y=(Dx*sin(radians(self.global_kurs))+Dy*(cos(radians(self.global_kurs))))+self.RoboPosY
 
-            self.globalObstaclesList.append([int(X),int(Y)])
-    
-    def updateHardObstacles(self,pumperL,pumperR):
-        """Status der Stosstange in Karte eintragen"""
-        if pumperL:
-            self.updateObstacles([(10, 20)])
-            self.updateObstacles([(10, 10)])
-            self.updateObstacles([(10, 0)])
-        if pumperR:
-            self.updateObstacles([(10, -20)])
-            self.updateObstacles([(10, -10)])
-            self.updateObstacles([(10, 0)])
+            global_obstacle_list.append([int(X),int(Y)])
+        return(global_obstacle_list)
 
     def updateRoboPos(self,deltaL,deltaR,KompassCourse=None):
         """Update Robo Position auf Karte"""
@@ -105,7 +107,7 @@ class Karte():
 
     def getObstacles(self):
         """return latest Obstacles and clears obstacles"""
-        ausgabeObstacle = self.globalObstaclesList
+        ausgabeObstacle = self.globalObstaclesList + self.globalHardObstaclesList
         self.globalObstaclesList = []
         return(ausgabeObstacle)
 
