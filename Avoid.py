@@ -74,7 +74,7 @@ class Avoid():
 
     def calc_force(self, dist, kurs_diff):
         """return INT avoidance_force , higher if dist shorter, higher if kurs_diff smaller"""
-        avoid_force = exp(-(dist-60)*0.07)    #50 norm.
+        avoid_force = exp(-(dist-70)*0.07)    #50 norm.
         angle_force = cos(radians(kurs_diff))
         if kurs_diff < 0:
             avoid_force = abs(avoid_force) * (-1)

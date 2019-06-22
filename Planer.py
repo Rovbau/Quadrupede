@@ -17,9 +17,12 @@ class Planer():
         self.goal_position = [3000,0]
         self.blocked_activ = False
         self.enter_blocked_time = 0
+        self.command_list = []
+        self.track_back = []
+        self.aktual_command = 0
 
     def set_modus(self, x, y, pose, steer, speed, avoid_steering, max_left, max_right, em_stop):
-        """Set Robot modus: wall or goal"""
+        """Set Robot modus: wall or goal or blocked"""
         self.x = x
         self.y = y
         self.pose = pose
@@ -31,6 +34,7 @@ class Planer():
    
         kurs_to_ziel = self.avoid.direction(x, y, self.goal_position[0], self.goal_position[1])
         self.kurs_diff = self.avoid.angle_diff(kurs_to_ziel, pose)
+        self.last_commands()
            
         if em_stop == True or self.blocked_activ == True:
             self.modus_blocked()
@@ -43,23 +47,31 @@ class Planer():
         return(self.steering_output, self.speed)
 
     def modus_blocked(self):
-        print("modus_blocked")
+        """Follows the same path back(self.command_list), Set: steering_output / speed"""
+        print("modus_blocked")              
         if self.blocked_activ == False:
             self.blocked_activ = True
-            self.enter_blocked_time = time()
+            self.aktual_command = 0
+            self.command_list.reverse()
+            self.track_back = self.command_list[:]
             self.karte.updateHardObstacles()
-        if time() - self.enter_blocked_time > 5:
-            self.speed = 1
-            self.blocked_activ = False
-        else:
-            self.speed = -1     
-        self.steering_output = 0
-        
+        if self.track_back:
+            self.aktual_command += 1      
+            if self.aktual_command < len(self.track_back):
+                self.steering_output = self.track_back[self.aktual_command][0] * (-1)
+                self.speed = -1
+            else:
+                self.blocked_activ = False
+                self.speed = 1
+                self.track_back = []
+                print("blocked_end")
+                 
     def modus_go_to_goal(self):
         print("modus_go_to_goal")
         self.steering_output =  self.kurs_diff / 90 + self.avoid_steering
 
     def exit_wall_modus(self):
+        """Exit Wall_modus if dist to goal is smaller as before"""
         dist = self.avoid.distance(self.x, self.y, self.goal_position[0], self.goal_position[1])
         if self.leaving_track_dist_to_goal - dist > 50:
             return(True)
@@ -67,6 +79,7 @@ class Planer():
             return(False)
 
     def modus_wall(self):
+        """Follow wall left/right, until dist to goal is small as before"""
         if self.wall_modus == False:
             self.wall_modus = True
             self.leaving_track_dist_to_goal = self.avoid.distance(self.x, self.y, self.goal_position[0], self.goal_position[1])
@@ -88,6 +101,15 @@ class Planer():
         if self.exit_wall_modus():
             self.wall_modus = False
         return
+
+    def last_commands(self):
+        """pop first elements from list: to maintain length"""
+        MAX_OBST_OBSERV = 15
+        self.command_list.append([self.steer, self.speed])
+        if len(self.command_list) > MAX_OBST_OBSERV:
+            len_fifo = len(self.command_list) - MAX_OBST_OBSERV 
+            del self.command_list[:len_fifo]      
+        
     
 if __name__ == "__main__":
     
